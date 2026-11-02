@@ -167,7 +167,7 @@
 
   @media print{
     body{background:#fff;padding:0}
-    .actions,.hint{display:none}
+    .actions,.hint,#installBanner{display:none}
     .sheet{box-shadow:none}
   }
 </style>
@@ -239,12 +239,19 @@
   <p class="hint">* تُضاف فواصل الآلاف تلقائياً، استخدم النقطة (.) للفاصلة العشرية — الحقول الفارغة تُحذف عند الحفظ كصورة</p>
 </div>
 
+<!-- ================== نافذة التثبيت المخصصة ================== -->
+<div id="installBanner" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #0f4c75; color: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999; text-align: center; width: 90%; max-width: 400px; border: 2px solid #22d3ee;">
+  <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 16px;">قم بتثبيت التطبيق للوصول السريع!</p>
+  <button id="installBtn" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-family: inherit; font-size: 16px; cursor: pointer; width: 100%; margin-bottom: 8px;">تثبيت الآن</button>
+  <button id="closeBanner" style="background: transparent; color: #93a7bd; border: none; cursor: pointer; font-size: 13px;">لاحقاً</button>
+</div>
+
 <!-- ================== html2canvas ================== -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <!-- ================== كود التطبيق ================== -->
 <script>
-/* ================== تسجيل Service Worker ================== */
+/* ================== 1. تسجيل Service Worker ================== */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
@@ -252,7 +259,55 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-/* ================== التاريخ والوقت واليوم ================== */
+/* ================== 2. نظام التثبيت المخصص ================== */
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // منع المتصفح من إظهار الشريط الافتراضي
+  e.preventDefault();
+  // حفظ الحدث لاستخدامه عند الضغط على الزر
+  deferredPrompt = e;
+  
+  // إظهار نافذة التثبيت المخصصة
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.style.display = 'block';
+});
+
+const installBtn = document.getElementById('installBtn');
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      // إظهار نافذة التثبيت الخاصة بالمتصفح
+      deferredPrompt.prompt();
+      
+      // انتظار اختيار المستخدم
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response: ${outcome}`);
+      
+      // إخفاء النافذة المخصصة
+      document.getElementById('installBanner').style.display = 'none';
+      
+      // مسح الحدث
+      deferredPrompt = null;
+    }
+  });
+}
+
+const closeBannerBtn = document.getElementById('closeBanner');
+if (closeBannerBtn) {
+  closeBannerBtn.addEventListener('click', () => {
+    document.getElementById('installBanner').style.display = 'none';
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  console.log('PWA was installed');
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.style.display = 'none';
+  deferredPrompt = null;
+});
+
+/* ================== 3. التاريخ والوقت واليوم ================== */
 const AR_DAYS   = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 const AR_MONTHS = ['كانون الثاني','شباط','آذار','نيسان','أيار','حزيران',
                    'تموز','آب','أيلول','تشرين الأول','تشرين الثاني','كانون الأول'];
@@ -276,7 +331,7 @@ function tick(){
 tick();
 setInterval(tick, 1000);
 
-/* ================== العناصر ================== */
+/* ================== 4. العناصر ================== */
 const sheet     = document.getElementById('sheet');
 const fields    = [...document.querySelectorAll('.field')];
 const inputs    = [...document.querySelectorAll('.field input')];
@@ -285,7 +340,7 @@ const btnToggle = document.getElementById('toggleEmpty');
 const btnClear  = document.getElementById('clearAll');
 const btnSave   = document.getElementById('saveImg');
 
-/* ================== تحديث حالة الحقول ================== */
+/* ================== 5. تحديث حالة الحقول ================== */
 function refresh(){
   fields.forEach(f => {
     const i = f.querySelector('input');
@@ -297,7 +352,7 @@ function refresh(){
 }
 refresh();
 
-/* ================== تنسيق الأرقام بفواصل الآلاف ================== */
+/* ================== 6. تنسيق الأرقام بفواصل الآلاف ================== */
 function formatNumberInput(raw){
   let v = raw
     .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
@@ -320,7 +375,7 @@ function formatNumberInput(raw){
   return intPart;
 }
 
-/* ================== فلترة وتنسيق الأرقام ================== */
+/* ================== 7. فلترة وتنسيق الأرقام ================== */
 inputs.forEach(inp => {
   inp.addEventListener('input', () => {
     inp.value = formatNumberInput(inp.value);
@@ -337,7 +392,7 @@ inputs.forEach(inp => {
   });
 });
 
-/* ================== زر إخفاء / إظهار الحقول الفارغة ================== */
+/* ================== 8. زر إخفاء / إظهار الحقول الفارغة ================== */
 btnToggle.addEventListener('click', () => {
   const on = sheet.classList.toggle('hide-empty');
   btnToggle.textContent = on ? 'إظهار الحقول الفارغة' : 'إخفاء الحقول الفارغة';
@@ -345,7 +400,7 @@ btnToggle.addEventListener('click', () => {
   if (on && document.activeElement) document.activeElement.blur();
 });
 
-/* ================== زر مسح الكل ================== */
+/* ================== 9. زر مسح الكل ================== */
 btnClear.addEventListener('click', () => {
   if (!confirm('هل أنت متأكد من مسح جميع الحقول؟')) return;
   inputs.forEach(i => i.value = '');
@@ -356,7 +411,7 @@ btnClear.addEventListener('click', () => {
   inputs[0].focus();
 });
 
-/* ================== زر حفظ كصورة ================== */
+/* ================== 10. زر حفظ كصورة ================== */
 function stamp(){
   const n = new Date();
   return `${n.getFullYear()}-${pad(n.getMonth()+1)}-${pad(n.getDate())}_${pad(n.getHours())}-${pad(n.getMinutes())}`;
