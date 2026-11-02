@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Heavy Oil Depot Tuba</title>
+
+<!-- ================== PWA / Manifest ================== -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0f4c75">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tuba Depot">
+<link rel="icon" type="image/svg+xml" href="./icon.svg">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png">
+
+<!-- ================== الخطوط ================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Cairo',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%, #1e4b6e 0%, #0b1622 55%, #070d15 100%);
+    min-height:100vh;
+    padding:18px 14px 40px;
+    display:flex;justify-content:center;
+    color:#0f172a;
+  }
+  .wrap{width:100%;max-width:980px}
+
+  /* ================= البطاقة ================= */
+  .sheet{
+    background:#fff;border-radius:20px;overflow:hidden;
+    box-shadow:0 30px 70px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06);
+  }
+
+  /* ================= الترويسة ================= */
+  .head{
+    position:relative;text-align:center;padding:22px 20px 20px;color:#fff;
+    background:
+      radial-gradient(600px 200px at 50% -60px, rgba(56,189,248,.45), transparent 70%),
+      linear-gradient(135deg,#0a2540 0%, #0f4c75 50%, #0b7d8f 100%);
+  }
+  .head::after{
+    content:'';position:absolute;inset:auto 0 0 0;height:4px;
+    background:linear-gradient(90deg,#38bdf8,#22d3ee,#10b981,#f59e0b);
+  }
+
+  /* ================= الشعار ================= */
+  .logo{
+    width:90px;
+    height:90px;
+    display:block;
+    margin:0 auto 10px;
+    object-fit:contain;
+    background:#fff;
+    border-radius:18px;
+    padding:4px;
+    box-shadow:0 10px 24px rgba(0,0,0,.28);
+  }
+
+  .head h1{
+    font-size:clamp(20px,3.8vw,30px);font-weight:900;letter-spacing:.5px;
+    direction:ltr;
+  }
+  .head .sub{font-size:clamp(12px,2.4vw,15px);font-weight:600;opacity:.92;margin-top:4px}
+  .dt{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  .pill{
+    background:rgba(255,255,255,.13);
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:999px;padding:6px 16px;
+    font-size:13.5px;font-weight:700;white-space:nowrap;
+  }
+
+  /* ================= المجموعات ================= */
+  .group{margin:16px;border-radius:14px;overflow:hidden;border:1.5px solid #e6edf4}
+  .group.stock{--c:#0284c7;--c2:#38bdf8;--bg:#f2f9ff}
+  .group.pump {--c:#b45309;--c2:#f59e0b;--bg:#fffaf0}
+  .group.recv {--c:#047857;--c2:#10b981;--bg:#f1fdf7}
+
+  .ghead{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 14px;color:#fff;font-weight:800;font-size:16px;
+    background:linear-gradient(90deg,var(--c),var(--c2));
+    letter-spacing:.5px;
+  }
+  .ghead small{
+    font-weight:700;font-size:12px;opacity:.95;
+    background:rgba(255,255,255,.20);padding:2px 10px;border-radius:999px;letter-spacing:0;
+  }
+
+  /* ============ الحقول ============ */
+  .fields{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));
+    gap:10px;padding:12px;background:var(--bg);
+    direction:ltr;
+  }
+
+  .field{
+    display:flex;flex-direction:column;gap:6px;
+    background:#fff;
+    border:1.5px solid #dde5ee;
+    border-inline-start:6px solid var(--c);
+    border-radius:8px;
+    padding:8px 8px 10px;
+    direction:ltr;
+  }
+  .field > span{
+    font-size:12.5px;font-weight:800;color:var(--c);
+    text-align:center;letter-spacing:.4px;
+  }
+  .field input{
+    width:100%;height:46px;
+    border:1.5px solid #cbd5e1;border-radius:6px;
+    background:#fff;color:#0f172a;
+    font-family:inherit;font-size:20px;font-weight:800;text-align:center;
+    padding:0 6px;
+    transition:border-color .15s, box-shadow .15s, background .15s;
+  }
+  .field input:focus{
+    outline:none;border-color:var(--c);
+    box-shadow:0 0 0 3px rgba(2,132,199,.16);
+  }
+  .field:not(.has-value) input{background:#f7fafc}
+
+  /* ============ إخفاء الحقول الفارغة ============ */
+  .sheet.hide-empty .field:not(.has-value){display:none}
+  .sheet.hide-empty .group.empty{display:none}
+
+  /* ================= الذيل ================= */
+  .foot{
+    padding:13px;text-align:center;font-weight:800;font-size:15px;
+    color:#e2e8f0;letter-spacing:.5px;
+    background:linear-gradient(135deg,#0a2540,#0f4c75);
+    border-top:3px solid #22d3ee;
+    direction:ltr;
+  }
+  .foot .osama{
+    color:#fbbf24;
+    font-weight:900;
+    letter-spacing:1px;
+    text-shadow:0 0 10px rgba(251,191,36,.75), 0 0 22px rgba(251,191,36,.35);
+  }
+
+  /* ================= الأزرار ================= */
+  .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+  .btn{
+    border:none;cursor:pointer;font-family:inherit;font-weight:800;font-size:14.5px;
+    padding:12px 22px;border-radius:12px;color:#fff;
+    display:inline-flex;align-items:center;gap:8px;
+    box-shadow:0 10px 22px rgba(0,0,0,.35);
+    transition:transform .12s, filter .12s;
+  }
+  .btn:active{transform:translateY(1px) scale(.99)}
+  .btn:hover{filter:brightness(1.08)}
+  .btn:disabled{opacity:.65;cursor:wait}
+  .btn.save  {background:linear-gradient(135deg,#059669,#34d399)}
+  .btn.clear {background:linear-gradient(135deg,#b91c1c,#f87171)}
+  .btn.toggle{background:linear-gradient(135deg,#1d4ed8,#60a5fa)}
+  .btn.toggle.active{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+
+  .hint{text-align:center;color:#93a7bd;font-size:12.5px;margin-top:10px;font-weight:600}
+
+  @media print{
+    body{background:#fff;padding:0}
+    .actions,.hint{display:none}
+    .sheet{box-shadow:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="sheet" id="sheet">
+
+    <!-- ======= الترويسة ======= -->
+    <header class="head">
+      <img src="./icon-192.png" alt="Tuba Logo" class="logo" onerror="this.style.display='none'" />
+      
+      <h1>Heavy Oil Depot Tuba</h1>
+      <p class="sub">كمية النفط المستلم والمصدر من المستودع</p>
+      <div class="dt">
+        <span class="pill" id="day">—</span>
+        <span class="pill" id="date">—</span>
+        <span class="pill" id="clock">—</span>
+      </div>
+    </header>
+
+    <!-- ======= Stock ======= -->
+    <section class="group stock">
+      <div class="ghead">Stock <small>المخزون</small></div>
+      <div class="fields">
+        <label class="field"><span>Total</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+        <label class="field"><span>Avail</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+        <label class="field"><span>Free</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+      </div>
+    </section>
+
+    <!-- ======= Pump ======= -->
+    <section class="group pump">
+      <div class="ghead">Pump <small>الضخ</small></div>
+      <div class="fields">
+        <label class="field"><span>S.P.M</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+        <label class="field"><span>PS.1</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+        <label class="field"><span>Zub.2</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+      </div>
+    </section>
+
+    <!-- ======= Received ======= -->
+    <section class="group recv">
+      <div class="ghead">Received <small>الاستلامات</small></div>
+      <div class="fields">
+        <label class="field"><span>WQ.1</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+        <label class="field"><span>WQ.2</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+        <label class="field"><span>Halfaya</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+        <label class="field"><span>Graf</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+        <label class="field"><span>Ahdab</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+        <label class="field"><span>Azel</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+        <label class="field"><span>Masfa</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+        <label class="field"><span>Artawe</span><input type="text" inputmode="decimal" autocomplete="off" placeholder=" "></label>
+      </div>
+    </section>
+
+    <!-- ======= الذيل ======= -->
+    <footer class="foot">programming <span class="osama">Osama</span></footer>
+  </div>
+
+  <!-- ======= الأزرار ======= -->
+  <div class="actions">
+    <button class="btn toggle" id="toggleEmpty">إخفاء الحقول الفارغة</button>
+    <button class="btn clear"  id="clearAll">مسح الكل</button>
+    <button class="btn save"   id="saveImg">حفظ كصورة</button>
+  </div>
+  <p class="hint">* تُضاف فواصل الآلاف تلقائياً، استخدم النقطة (.) للفاصلة العشرية — الحقول الفارغة تُحذف عند الحفظ كصورة</p>
+</div>
+
+<!-- ================== html2canvas ================== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- ================== كود التطبيق ================== -->
+<script>
+/* ================== تسجيل Service Worker ================== */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+
+/* ================== التاريخ والوقت واليوم ================== */
+const AR_DAYS   = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const AR_MONTHS = ['كانون الثاني','شباط','آذار','نيسان','أيار','حزيران',
+                   'تموز','آب','أيلول','تشرين الأول','تشرين الثاني','كانون الأول'];
+
+const dayEl   = document.getElementById('day');
+const dateEl  = document.getElementById('date');
+const clockEl = document.getElementById('clock');
+
+function pad(n){ return String(n).padStart(2,'0'); }
+
+function tick(){
+  const n = new Date();
+  dayEl.textContent  = AR_DAYS[n.getDay()];
+  dateEl.textContent = `${n.getDate()} ${AR_MONTHS[n.getMonth()]} ${n.getFullYear()}`;
+
+  let h = n.getHours();
+  const ampm = h >= 12 ? 'م' : 'ص';
+  h = h % 12 || 12;
+  clockEl.textContent = `${pad(h)}:${pad(n.getMinutes())}:${pad(n.getSeconds())} ${ampm}`;
+}
+tick();
+setInterval(tick, 1000);
+
+/* ================== العناصر ================== */
+const sheet     = document.getElementById('sheet');
+const fields    = [...document.querySelectorAll('.field')];
+const inputs    = [...document.querySelectorAll('.field input')];
+const groups    = [...document.querySelectorAll('.group')];
+const btnToggle = document.getElementById('toggleEmpty');
+const btnClear  = document.getElementById('clearAll');
+const btnSave   = document.getElementById('saveImg');
+
+/* ================== تحديث حالة الحقول ================== */
+function refresh(){
+  fields.forEach(f => {
+    const i = f.querySelector('input');
+    f.classList.toggle('has-value', i.value.trim() !== '');
+  });
+  groups.forEach(g => {
+    g.classList.toggle('empty', !g.querySelector('.field.has-value'));
+  });
+}
+refresh();
+
+/* ================== تنسيق الأرقام بفواصل الآلاف ================== */
+function formatNumberInput(raw){
+  let v = raw
+    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+    .replace(/[٫]/g, '.')
+    .replace(/[،,]/g, '')
+    .replace(/[^\d.]/g, '');
+
+  const parts  = v.split('.');
+  let intPart  = (parts[0] || '').replace(/\D/g, '');
+  let decPart  = parts.slice(1).join('').replace(/\D/g, '');
+  const hasDot = v.includes('.');
+
+  if (intPart === '' && decPart === '' && !hasDot) return '';
+  if (intPart === '') intPart = '0';
+  intPart = intPart.replace(/^0+(?=\d)/, '');
+  intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  if (decPart.length > 0) return intPart + '.' + decPart;
+  if (hasDot) return intPart + '.';
+  return intPart;
+}
+
+/* ================== فلترة وتنسيق الأرقام ================== */
+inputs.forEach(inp => {
+  inp.addEventListener('input', () => {
+    inp.value = formatNumberInput(inp.value);
+    refresh();
+  });
+
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter'){
+      e.preventDefault();
+      const idx = inputs.indexOf(inp);
+      if (inputs[idx + 1]) inputs[idx + 1].focus();
+      else inp.blur();
+    }
+  });
+});
+
+/* ================== زر إخفاء / إظهار الحقول الفارغة ================== */
+btnToggle.addEventListener('click', () => {
+  const on = sheet.classList.toggle('hide-empty');
+  btnToggle.textContent = on ? 'إظهار الحقول الفارغة' : 'إخفاء الحقول الفارغة';
+  btnToggle.classList.toggle('active', on);
+  if (on && document.activeElement) document.activeElement.blur();
+});
+
+/* ================== زر مسح الكل ================== */
+btnClear.addEventListener('click', () => {
+  if (!confirm('هل أنت متأكد من مسح جميع الحقول؟')) return;
+  inputs.forEach(i => i.value = '');
+  sheet.classList.remove('hide-empty');
+  btnToggle.textContent = 'إخفاء الحقول الفارغة';
+  btnToggle.classList.remove('active');
+  refresh();
+  inputs[0].focus();
+});
+
+/* ================== زر حفظ كصورة ================== */
+function stamp(){
+  const n = new Date();
+  return `${n.getFullYear()}-${pad(n.getMonth()+1)}-${pad(n.getDate())}_${pad(n.getHours())}-${pad(n.getMinutes())}`;
+}
+
+btnSave.addEventListener('click', async () => {
+  if (typeof html2canvas === 'undefined'){
+    alert('مكتبة حفظ الصورة غير محمّلة، تأكد من الاتصال بالإنترنت.');
+    return;
+  }
+
+  const wasHidden = sheet.classList.contains('hide-empty');
+  sheet.classList.add('hide-empty');
+  if (document.activeElement) document.activeElement.blur();
+
+  const oldText = btnSave.textContent;
+  btnSave.textContent = 'جاري الحفظ...';
+  btnSave.disabled = true;
+
+  await new Promise(r => setTimeout(r, 120));
+
+  try{
+    const canvas = await html2canvas(sheet, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true
+    });
+    const link = document.createElement('a');
+    link.download = `Tuba-Depot-${stamp()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }catch(err){
+    console.error(err);
+    alert('تعذّر إنشاء الصورة، حاول مرة أخرى.');
+  }finally{
+    btnSave.textContent = oldText;
+    btnSave.disabled = false;
+    if (!wasHidden) sheet.classList.remove('hide-empty');
+    refresh();
+  }
+});
+</script>
+</body>
+</html>
