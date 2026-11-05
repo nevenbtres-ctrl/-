@@ -1,7 +1,7 @@
 /* ================== Service Worker — Tuba Depot ================== */
 /* ملاحظة: عند تحديث الكود، غيّر رقم CACHE_VERSION لإجبار التحديث */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME    = `tuba-depot-${CACHE_VERSION}`;
 
 const LOCAL_ASSETS = [
